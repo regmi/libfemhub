@@ -1,3 +1,5 @@
+import sys
+
 class Domain:
 
     def __init__(self, *args):
@@ -40,31 +42,37 @@ class Domain:
             s += ("%s %s %s,") % tuple(c)
         return s
 
-    def get_html(self):
-        path = "/javascript/mesh_editor"
-        return """\
+    def get_html(self, self_name="d", editor="flex"):
+        if editor == "flex":
+            path = "/javascript/mesh_editor"
+            return """\
 <html>
 <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
             width="830" height="600">
     <param name="movie" value="%(path)s/MeshEditor.swf">
     <param name="flashvars" value="output_cell=%(cn)s&nodes=%(nodes)s
-        &elements=%(elements)s&boundaries=%(boundaries)s&curves=%(curves)s" />
+        &elements=%(elements)s&boundaries=%(boundaries)s&curves=%(curves)s
+        &var_name=%(var_name)s" />
     <!--[if !IE]>-->
         <object type="application/x-shockwave-flash"
             data="%(path)s/MeshEditor.swf" width="830" height="600">
     <!--<![endif]-->
     <param name="flashvars" value="output_cell=%(cn)s&nodes=%(nodes)s
-        &elements=%(elements)s& boundaries=%(boundaries)s&curves=%(curves)s" />
+        &elements=%(elements)s& boundaries=%(boundaries)s&curves=%(curves)s
+        &var_name=%(var_name)s" />
     <p>Alternative Content</p>
     <!--[if !IE]>-->
         </object>
     <!--<![endif]-->
 </object>
 </html>""" % {"path": path, "cn": self._cell_id,
-        "nodes": self.convert_nodes(self._nodes),
-        "elements": self.convert_elements(self._elements),
-        "boundaries": self.convert_boundaries(self._boundaries),
-        "curves": self.convert_curves(self._curves)}
+                "nodes": self.convert_nodes(self._nodes),
+                "elements": self.convert_elements(self._elements),
+                "boundaries": self.convert_boundaries(self._boundaries),
+                "curves": self.convert_curves(self._curves),
+                "var_name": self_name}
+        else:
+            return "sorry"
 
     def get_mesh(self):
         from hermes2d import Mesh
@@ -72,6 +80,14 @@ class Domain:
         m.create(self._nodes, self._elements, self._boundaries, self._curves)
         return m
 
-    def edit(self):
-        s = self.get_html()
-        print s
+    def edit(self, editor="flex"):
+        """
+        editor .... either "flex" or "js"
+        """
+
+        self_name = "d"
+        locs = sys._getframe(1).f_locals
+        for var in locs:
+            if id(locs[var]) == id(self):
+                self_name = var
+        print self.get_html(self_name=self_name, editor=editor)
