@@ -91,7 +91,8 @@ value="%(var_name)s"></td></tr><tr><td><button onclick="
         alert('You need to give a Sage variable name to the graph, before saving it.');
         return;
     }
-    f = g[2] + ' = Graph(' + g[0] + '); ' + g[2] + '.set_pos(' + g[1] + '); '
+    f = '#' + $('#cell_input_%(cell_id)s').val() + '\\n';
+    f += g[2] + ' = Graph(' + g[0] + '); ' + g[2] + '.set_pos(' + g[1] + '); '
     f += ' graph_editor(' + g[2] + ');'
     $('#cell_input_%(cell_id)s').val(f);
     cell_input_resize(%(cell_id)s);
