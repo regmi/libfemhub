@@ -91,11 +91,11 @@ value="%(var_name)s"></td></tr><tr><td><button onclick="
         alert('You need to give a Sage variable name to the graph, before saving it.');
         return;
     }
-    f = '#' + $('#cell_input_%(cell_id)s').val() + '\\n';
+    f = '#' + $('#cell_input_%(cell_id_save)s').val() + '\\n';
     f += g[2] + ' = Domain(' + g[0] + ', ' + g[1] + '); '
-    $('#cell_input_%(cell_id)s').val(f);
-    cell_input_resize(%(cell_id)s);
-    evaluate_cell(%(cell_id)s, false);
+    $('#cell_input_%(cell_id_save)s').val(f);
+    cell_input_resize(%(cell_id_save)s);
+    evaluate_cell(%(cell_id_save)s, false);
 ">Save</button><button
 onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></table></div></font></html>""" % {"path": path,
                 "cell_id_save": self._cell_id,
