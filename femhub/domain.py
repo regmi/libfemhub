@@ -85,23 +85,17 @@ type="hidden" id="graph_data_%(cell_id)s"
 value="num_vertices=%(nodes_len)s;edges=[[0,1]];pos=%(nodes)s;"><input
 type="hidden" id="graph_name_%(cell_id)s"
 value="%(var_name)s"></td></tr><tr><td><button onclick="
-    alert('ok');
     var f, g, saved_input;
     g = $('#iframe_graph_editor_%(cell_id)s')[0].contentWindow.update_sage();
-
     if (g[2] === '') {
-        alert('You need to give a Sage variable name to the graph,
-before saving it.');
+        alert('You need to give a Sage variable name to the graph, before saving it.');
         return;
     }
-    f = g[2] + ' = Graph(' + g[0] + '); ' + g[2] + '.set_pos(' + g[1] +
-'); '
-
+    f = g[2] + ' = Graph(' + g[0] + '); ' + g[2] + '.set_pos(' + g[1] + '); '
     f += ' graph_editor(' + g[2] + ');'
     $('#cell_input_%(cell_id)s').val(f);
     cell_input_resize(%(cell_id)s);
     evaluate_cell(%(cell_id)s, false);
-
 ">Save</button><button
 onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></table></div></font></html>""" % {"path": path,
                 "cell_id_save": self._cell_id,
