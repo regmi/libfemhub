@@ -92,8 +92,7 @@ value="%(var_name)s"></td></tr><tr><td><button onclick="
         return;
     }
     f = '#' + $('#cell_input_%(cell_id)s').val() + '\\n';
-    f += g[2] + ' = Graph(' + g[0] + '); ' + g[2] + '.set_pos(' + g[1] + '); '
-    f += ' graph_editor(' + g[2] + ');'
+    f += g[2] + ' = Domain(' + g[0] + ', ' + g[1] + '); '
     $('#cell_input_%(cell_id)s').val(f);
     cell_input_resize(%(cell_id)s);
     evaluate_cell(%(cell_id)s, false);
