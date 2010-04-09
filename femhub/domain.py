@@ -44,25 +44,27 @@ class Domain:
         path = "/javascript/mesh_editor"
         return """\
 <html>
-    <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
-        width="830" height="600">
-        <param name="movie" value="%(path)s/MeshEditor.swf">
-        <param name="flashvars" value="output_cell=%(cn)s&nodes=%(nodes)s&elements=%(elements)s&boundaries=%(boundaries)s&curves=%(curves)s" />
-            <!--[if !IE]>-->
-            <object type="application/x-shockwave-flash" data="%(path)s/MeshEditor.swf" width="830"
-            height="600">
-            <!--<![endif]-->
-                <param name="flashvars" value="output_cell=%(cn)s&nodes=%(nodes)s&elements=%(elements)s& boundaries=%(boundaries)s&curves=%(curves)s" />
-                <p>Alternative Content</p>
-            <!--[if !IE]>-->
-            </object>
-            <!--<![endif]-->
+<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
+            width="830" height="600">
+    <param name="movie" value="%(path)s/MeshEditor.swf">
+    <param name="flashvars" value="output_cell=%(cn)s&nodes=%(nodes)s
+        &elements=%(elements)s&boundaries=%(boundaries)s&curves=%(curves)s" />
+    <!--[if !IE]>-->
+        <object type="application/x-shockwave-flash"
+            data="%(path)s/MeshEditor.swf" width="830" height="600">
+    <!--<![endif]-->
+    <param name="flashvars" value="output_cell=%(cn)s&nodes=%(nodes)s
+        &elements=%(elements)s& boundaries=%(boundaries)s&curves=%(curves)s" />
+    <p>Alternative Content</p>
+    <!--[if !IE]>-->
         </object>
-</html>
-        """ % {"path":path, "cn":self._cell_id, "nodes":self.convert_nodes(self._nodes),
-        "elements":self.convert_elements(self._elements),
-        "boundaries":self.convert_boundaries(self._boundaries),
-        "curves":self.convert_curves(self._curves)}
+    <!--<![endif]-->
+</object>
+</html>""" % {"path": path, "cn": self._cell_id,
+        "nodes": self.convert_nodes(self._nodes),
+        "elements": self.convert_elements(self._elements),
+        "boundaries": self.convert_boundaries(self._boundaries),
+        "curves": self.convert_curves(self._curves)}
 
     def get_mesh(self):
         from hermes2d import Mesh
@@ -72,5 +74,4 @@ class Domain:
 
     def edit(self):
         s = self.get_html()
-        #print s[s.find("html"):]
-        return s
+        print s
