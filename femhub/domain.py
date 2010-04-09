@@ -43,6 +43,9 @@ class Domain:
         return s
 
     def get_html(self, self_name="d", editor="flex"):
+        import sagenb.notebook.interact
+        self._cell_id_edit = sagenb.notebook.interact.SAGE_CELL_ID
+
         if editor == "flex":
             path = "/javascript/mesh_editor"
             return """\
@@ -72,7 +75,43 @@ class Domain:
                 "curves": self.convert_curves(self._curves),
                 "var_name": self_name}
         else:
-            return "sorry"
+            path = "/javascript/graph_editor"
+            return """\
+<html><font color='black'><div
+id="graph_editor_%(cell_id)s"><table><tbody><tr><td><iframe style="width: 800px;
+ height: 400px; border: 0;" id="iframe_graph_editor_%(cell_id)s"
+src="%(path)s/graph_editor.html?cell_id=%(cell_id)s"></iframe><input
+type="hidden" id="graph_data_%(cell_id)s"
+value="num_vertices=%(nodes_len)s;edges=[[0,1]];pos=%(nodes)s;"><input
+type="hidden" id="graph_name_%(cell_id)s"
+value="%(var_name)s"></td></tr><tr><td><button onclick="
+    alert('ok');
+    var f, g, saved_input;
+    g = $('#iframe_graph_editor_%(cell_id)s')[0].contentWindow.update_sage();
+
+    if (g[2] === '') {
+        alert('You need to give a Sage variable name to the graph,
+before saving it.');
+        return;
+    }
+    f = g[2] + ' = Graph(' + g[0] + '); ' + g[2] + '.set_pos(' + g[1] +
+'); '
+
+    f += ' graph_editor(' + g[2] + ');'
+    $('#cell_input_%(cell_id)s').val(f);
+    cell_input_resize(%(cell_id)s);
+    evaluate_cell(%(cell_id)s, false);
+
+">Save</button><button
+onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></table></div></font></html>""" % {"path": path,
+                "cell_id_save": self._cell_id,
+                "cell_id": self._cell_id_edit,
+                "nodes": str(self._nodes),
+                "nodes_len": len(self._nodes),
+                "elements": self.convert_elements(self._elements),
+                "boundaries": self.convert_boundaries(self._boundaries),
+                "curves": self.convert_curves(self._curves),
+                "var_name": self_name}
 
     def get_mesh(self):
         from hermes2d import Mesh
