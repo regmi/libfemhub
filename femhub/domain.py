@@ -66,16 +66,12 @@ class Domain:
 <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
             width="830" height="600">
     <param name="movie" value="%(path)s/MeshEditor.swf">
-    <param name="flashvars" value="output_cell=%(cn)s&nodes=%(nodes)s
-        &elements=%(elements)s&boundaries=%(boundaries)s&curves=%(curves)s
-        &var_name=%(var_name)s" />
+    <param name="flashvars" value="output_cell=%(cn)s&nodes=%(nodes)s&elements=%(elements)s&boundaries=%(boundaries)s&curves=%(curves)s&var_name=%(var_name)s" />
     <!--[if !IE]>-->
         <object type="application/x-shockwave-flash"
             data="%(path)s/MeshEditor.swf" width="830" height="600">
     <!--<![endif]-->
-    <param name="flashvars" value="output_cell=%(cn)s&nodes=%(nodes)s
-        &elements=%(elements)s& boundaries=%(boundaries)s&curves=%(curves)s
-        &var_name=%(var_name)s" />
+    <param name="flashvars" value="output_cell=%(cn)s&nodes=%(nodes)s&elements=%(elements)s& boundaries=%(boundaries)s&curves=%(curves)s&var_name=%(var_name)s" />
     <p>Alternative Content</p>
     <!--[if !IE]>-->
         </object>
