@@ -2,15 +2,30 @@ import sys
 
 class Domain:
 
+    @classmethod
+    def from_graph_editor(cls, vertices, edges):
+        import triangulation
+        vertices, edges = triangulation.convert_graph(vertices, edges)
+        edges = triangulation.sort_edges(edges)
+        #print vertices, edges
+        #elems = triangulation.triangulate_af(vertices, edges)
+        return Domain(vertices, [], [], [], edges)
+
     def __init__(self, *args):
         if len(args) == 0:
-            nodes, elements, boundaries, curves = [], [], [], []
-        else:
+            nodes, elements, boundaries, curves, edges = [], [], [], [], []
+        elif len(args) == 4:
             nodes, elements, boundaries, curves = args
+            edges = []
+        elif len(args) == 5:
+            nodes, elements, boundaries, curves, edges = args
+        else:
+            raise Exception("Unknown arguments")
         self._nodes = nodes
         self._elements = elements
         self._boundaries = boundaries
         self._curves = curves
+        self._edges = edges
 
         import sagenb.notebook.interact
         self._cell_id = sagenb.notebook.interact.SAGE_CELL_ID
@@ -76,13 +91,14 @@ class Domain:
                 "var_name": self_name}
         else:
             path = "/javascript/graph_editor"
+            edges = [[a, b] for a, b in self._edges]
             return """\
 <html><font color='black'><div
 id="graph_editor_%(cell_id)s"><table><tbody><tr><td><iframe style="width: 800px;
  height: 400px; border: 0;" id="iframe_graph_editor_%(cell_id)s"
 src="%(path)s/graph_editor.html?cell_id=%(cell_id)s"></iframe><input
 type="hidden" id="graph_data_%(cell_id)s"
-value="num_vertices=%(nodes_len)s;edges=[[0,1]];pos=%(nodes)s;"><input
+value="num_vertices=%(nodes_len)s;edges=%(edges)s;pos=%(nodes)s;"><input
 type="hidden" id="graph_name_%(cell_id)s"
 value="%(var_name)s"></td></tr><tr><td><button onclick="
     var f, g, saved_input;
@@ -91,8 +107,12 @@ value="%(var_name)s"></td></tr><tr><td><button onclick="
         alert('You need to give a Sage variable name to the graph, before saving it.');
         return;
     }
-    f = '#' + $('#cell_input_%(cell_id_save)s').val() + '\\n';
-    f += g[2] + ' = Domain(' + g[0] + ', ' + g[1] + '); '
+
+    // This is how to comment out the previous contents of the cell:
+    //f = '#' + $('#cell_input_%(cell_id_save)s').val() + '\\n';
+
+    f = '# Automatically generated:\\n';
+    f += g[2] + ' = Domain.from_graph_editor(' + g[1] + ', ' + g[0] + ')';
     $('#cell_input_%(cell_id_save)s').val(f);
     cell_input_resize(%(cell_id_save)s);
     evaluate_cell(%(cell_id_save)s, false);
@@ -102,6 +122,7 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
                 "cell_id": self._cell_id_edit,
                 "nodes": str(self._nodes),
                 "nodes_len": len(self._nodes),
+                "edges": edges,
                 "elements": self.convert_elements(self._elements),
                 "boundaries": self.convert_boundaries(self._boundaries),
                 "curves": self.convert_curves(self._curves),
@@ -124,3 +145,26 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
             if id(locs[var]) == id(self):
                 self_name = var
         print self.get_html(self_name=self_name, editor=editor)
+
+    def normalize(self):
+        pts_list = self._nodes
+        _max = -1;
+        for v in pts_list:
+            if v[0] > _max:
+                _max = v[0]
+            if v[1] > _max:
+                _max = v[1]
+        _max = float(_max)
+        pts_list = [[v[0]/_max, 1.0-v[1]/_max] for v in pts_list]
+        self._nodes = pts_list
+
+    def triangulate(self, vertices, edges):
+        # Example (unit square diagonally split into 4 triangles)
+        pts_list = [(0,0), (1,0), (0,1), (1,1), (0.5,0.5)]
+        print "List of points:", pts_list
+        bdy_edges = [(0,1), (1,3), (3,2), (2,0)]
+        print "List of boundary edges:", bdy_edges
+        from triangulation import triangulate_af, plot_tria_mesh
+        elems = triangulate_af(pts_list, bdy_edges)
+        print "List of elements:", elems
+        plot_tria_mesh(pts_list, elems)
