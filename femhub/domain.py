@@ -89,7 +89,20 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
         print self.get_html(self_name=self_name, editor=editor)
 
     def normalize(self):
+        """
+        Transforms the domain coordinates into (0, 1)x(0, 1).
+
+        Angles (ratio) are preserved.
+        """
         pts_list = self._nodes
+        _min = 1e10;
+        for v in pts_list:
+            if v[0] < _min:
+                _min = v[0]
+            if v[1] < _min:
+                _min = v[1]
+        _min = float(_min)
+        pts_list = [[v[0]-_min, v[1]-_min] for v in pts_list]
         _max = -1;
         for v in pts_list:
             if v[0] > _max:
