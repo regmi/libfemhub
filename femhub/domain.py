@@ -100,7 +100,8 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
         print "List of points:", self._nodes
         print "List of boundary edges:", self._edges
         elems = triangulation.triangulate_af(self._nodes, self._edges)
-        return Mesh(self._nodes, elems)
+        boundaries = [list(b)+[1] for b in self._edges]
+        return Mesh(self._nodes, elems, boundaries)
 
 class Mesh:
     """
@@ -122,6 +123,17 @@ class Mesh:
 
         import sagenb.notebook.interact
         self._cell_id = sagenb.notebook.interact.SAGE_CELL_ID
+
+    def __str__(self):
+        return """Mesh:
+    nodes:
+        %s
+    elements:
+        %s
+    boundaries:
+        %s
+    curves:
+        %s""" % (self._nodes, self._elements, self._boundaries, self._curves)
 
     def plot(self):
         import triangulation

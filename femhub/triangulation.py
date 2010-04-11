@@ -74,7 +74,7 @@ def triangulate_af(pts_list, bdy_edges):
        # take the last item from the list of bdy edges (and remove it)
        a,b = bdy_edges.pop()
        c = find_third_point(a, b, pts_list)
-       elems.append((a,b,c, 0))
+       elems.append((a,b,c))
        if is_boundary_edge(c, a, bdy_edges): bdy_edges.remove((c,a))
        else: bdy_edges.append((a,c))
        if is_boundary_edge(b, c, bdy_edges): bdy_edges.remove((b,c))
@@ -86,7 +86,7 @@ def plot_tria_mesh(pts_list, tria_mesh):
    clf()
    label=""
    for elem in tria_mesh:
-       a,b,c, marker = elem
+       a,b,c = elem
        ax,ay = pts_list[a]
        bx,by = pts_list[b]
        cx,cy = pts_list[c]
