@@ -1,6 +1,9 @@
 from numpy import exp, sqrt, array
 from pylab import plot, savefig, grid, legend, clf, pcolor, spy, axis
 
+class TriangulationError(Exception):
+    pass
+
 # Check whether a given point c lies on the left of
 # the edge (a,b)
 def is_on_the_left(c, a, b, pts_list):
@@ -42,7 +45,8 @@ def find_third_point(a, b, pts_list):
                minimum = crit
                pt_index = c_index
                found = 1
-   if found == 0: print "ERROR: Optimal point not found in find_third_point()."
+   if found == 0:
+       raise TriangulationError("ERROR: Optimal point not found in find_third_point().")
    return pt_index
 
 # If the point 'c' belong to a boundary edge, return False,
@@ -64,6 +68,7 @@ def is_boundary_edge(a, b, bdy_edges):
 def triangulate_af(pts_list, bdy_edges):
    # create empty list of elements
    elems = []
+   bdy_edges = bdy_edges[:]
    # main loop
    while bdy_edges != []:
        # take the last item from the list of bdy edges (and remove it)

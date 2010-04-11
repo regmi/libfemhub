@@ -1,6 +1,112 @@
 import sys
 
 class Domain:
+    """
+    Represents a FE domain.
+
+    Currently the domain is 2D and is defined by a set of nodes and (boundary)
+    edges. It can be made more general in the future.
+
+    The edges are always sorted.
+    """
+
+    @classmethod
+    def from_graph_editor(cls, vertices, edges):
+        import triangulation
+        vertices, edges = triangulation.convert_graph(vertices, edges)
+        edges = triangulation.sort_edges(edges)
+        return Domain(vertices, edges)
+
+    def __init__(self, nodes=[], edges=[]):
+        self._nodes = nodes
+        self._edges = edges
+
+        import sagenb.notebook.interact
+        self._cell_id_init = sagenb.notebook.interact.SAGE_CELL_ID
+
+    def get_html(self, self_name="d", editor="js"):
+        import sagenb.notebook.interact
+        self._cell_id_edit = sagenb.notebook.interact.SAGE_CELL_ID
+        if editor != "js":
+            raise Exception("Editor is not implemented.")
+
+        if editor == "js":
+            path = "/javascript/graph_editor"
+            edges = [[a, b] for a, b in self._edges]
+            nodes = [[a, b] for a, b in self._nodes]
+            return """\
+<html><font color='black'><div
+id="graph_editor_%(cell_id)s"><table><tbody><tr><td><iframe style="width: 800px;
+ height: 400px; border: 0;" id="iframe_graph_editor_%(cell_id)s"
+src="%(path)s/graph_editor.html?cell_id=%(cell_id)s"></iframe><input
+type="hidden" id="graph_data_%(cell_id)s"
+value="num_vertices=%(nodes_len)s;edges=%(edges)s;pos=%(nodes)s;"><input
+type="hidden" id="graph_name_%(cell_id)s"
+value="%(var_name)s"></td></tr><tr><td><button onclick="
+    var f, g, saved_input;
+    g = $('#iframe_graph_editor_%(cell_id)s')[0].contentWindow.update_sage();
+    if (g[2] === '') {
+        alert('You need to give a Sage variable name to the graph, before saving it.');
+        return;
+    }
+
+    // This is how to comment out the previous contents of the cell:
+    //f = '#' + $('#cell_input_%(cell_id_save)s').val() + '\\n';
+
+    f = '# Automatically generated:\\n';
+    f += g[2] + ' = Domain.from_graph_editor(' + g[1] + ', ' + g[0] + ')';
+    $('#cell_input_%(cell_id_save)s').val(f);
+    cell_input_resize(%(cell_id_save)s);
+    evaluate_cell(%(cell_id_save)s, false);
+">Save</button><button
+onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></table></div></font></html>""" % {"path": path,
+                "cell_id_save": self._cell_id_init,
+                "cell_id": self._cell_id_edit,
+                "nodes": nodes,
+                "nodes_len": len(self._nodes),
+                "edges": edges,
+                "var_name": self_name}
+
+    def edit(self, editor="js"):
+        self_name = "d"
+        locs = sys._getframe(1).f_locals
+        for var in locs:
+            if id(locs[var]) == id(self):
+                self_name = var
+        print self.get_html(self_name=self_name, editor=editor)
+
+    def normalize(self):
+        pts_list = self._nodes
+        _max = -1;
+        for v in pts_list:
+            if v[0] > _max:
+                _max = v[0]
+            if v[1] > _max:
+                _max = v[1]
+        _max = float(_max)
+        pts_list = [[v[0]/_max, 1.0-v[1]/_max] for v in pts_list]
+        self._nodes = pts_list
+
+    def triangulate(self, plot=False):
+        import triangulation
+        print "Triangulating..."
+        print "List of points:", self._nodes
+        print "List of boundary edges:", self._edges
+        self._elems = triangulation.triangulate_af(self._nodes, self._edges)
+        if plot:
+            triangulation.plot_tria_mesh(self._nodes, self._elems)
+
+class Mesh:
+    """
+    Represents a FE mesh.
+
+    Currently the mesh is 2D and is defined by a set of nodes and elements.
+    Element is either a set of 3 nodes (triangle) or 4 nodes (quad).
+    It can be made more general in the future.
+
+    It contains methods to export this mesh in the hermes2d (and other)
+    formats.
+    """
 
     @classmethod
     def from_graph_editor(cls, vertices, edges):
