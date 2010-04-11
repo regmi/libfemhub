@@ -12,6 +12,18 @@ class Domain:
 
     @classmethod
     def from_graph_editor(cls, vertices, edges):
+        """
+        Constructs the Domain() class from the output of the graph_editor.
+
+        The graph_editor returns vertices and edges in a specific format (as
+        dictionaries), so we need to convert them into the Domain() format.
+
+        Example:
+
+        >>> d = Domain.from_graph_editor({0:[35,35],1:[338,14],2:[315,315]},
+                    {0:[1],1:[0,2],2:[1]})
+
+        """
         import triangulation
         vertices, edges = triangulation.convert_graph(vertices, edges)
         edges = triangulation.sort_edges(edges)
