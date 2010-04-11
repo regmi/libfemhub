@@ -172,17 +172,17 @@ class Mesh:
 
     def convert_nodes(self, a):
         s = ""
-        for n2 in a:
-            s += "%s %s," % tuple(n2)
+        for x, y in a:
+            s += "%s %s," % (x*400, (1-y)*400)
         return s
 
     def convert_elements(self, a):
         s = ""
         for e in a:
-            if len(e) == 4:
-                s += "%s %s %s %s," % tuple(e)
-            elif len(e) == 5:
-                s += "%s %s %s %s %s," % tuple(e)
+            if len(e) == 3:
+                s += "%s %s %s 0," % tuple(e)
+            elif len(e) == 4:
+                s += "%s %s %s %s 0," % tuple(e)
         return s
 
     def convert_boundaries(self, a):
