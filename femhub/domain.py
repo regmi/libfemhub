@@ -40,7 +40,11 @@ class Domain:
         if editor == "js":
             path = "/javascript/graph_editor"
             edges = [[a, b] for a, b in self._edges]
-            nodes = [[a, b] for a, b in self._nodes]
+            b_max = -1
+            for a, b in self._nodes:
+                if b > b_max:
+                    b_max = b
+            nodes = [[a, b_max-b] for a, b in self._nodes]
             return """\
 <html><font color='black'><div
 id="graph_editor_%(cell_id)s"><table><tbody><tr><td><iframe style="width: 800px;
