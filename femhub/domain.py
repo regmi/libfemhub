@@ -15,7 +15,9 @@ class Domain:
         import triangulation
         vertices, edges = triangulation.convert_graph(vertices, edges)
         edges = triangulation.sort_edges(edges)
-        return Domain(vertices, edges)
+        d = Domain(vertices, edges)
+        d.normalize()
+        return d
 
     def __init__(self, nodes=[], edges=[]):
         self._nodes = nodes
@@ -95,7 +97,7 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
             if v[1] > _max:
                 _max = v[1]
         _max = float(_max)
-        pts_list = [[v[0]/_max, 1.0-v[1]/_max] for v in pts_list]
+        pts_list = [[v[0]/_max, v[1]/_max] for v in pts_list]
         self._nodes = pts_list
 
     def triangulate(self):

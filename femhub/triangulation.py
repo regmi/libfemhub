@@ -129,14 +129,6 @@ def convert_graph(vertices, edges):
         for n in edges[i]:
             if n > i:
                 _edges.append((i, n))
-    _max = -1;
-    for v in pts_list:
-        if v[0] > _max:
-            _max = v[0]
-        if v[1] > _max:
-            _max = v[1]
-    _max = float(_max)
-    pts_list = [[v[0]/_max, v[1]/_max] for v in pts_list]
     return pts_list, _edges
 
 def doit(edges, vertices):
