@@ -173,7 +173,7 @@ class Mesh:
     def convert_nodes(self, a):
         s = ""
         for x, y in a:
-            s += "%s %s," % (x*400, (1-y)*400)
+            s += "%s %s," % (x, y)
         return s
 
     def convert_elements(self, a):
