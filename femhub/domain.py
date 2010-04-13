@@ -154,13 +154,28 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
         from triangulation import polygon_area
         return polygon_area(self._nodes, self._edges)
 
-    def triangulate(self):
-        import triangulation
-        print "Triangulating..."
-        print "List of points:", self._nodes
-        print "List of boundary edges:", self._edges
-        elems = triangulation.triangulate_af(self._nodes, self._edges)
-        boundaries = [list(b)+[1] for b in self._edges]
+    def triangulate(self, debug=False):
+        from triangulation import triangulate_af, edges_flip_orientation
+        if debug:
+            print "Triangulating..."
+        if self.boundary_area() > 0:
+            # positive orientation
+            if debug:
+                print "edges orientation: positive"
+            edges = self._edges
+        else:
+            # negative orientation
+            if debug:
+                print "edges orientation: negative (flipping the orientation)"
+            edges = edges_flip_orientation(self._edges)
+        if debug:
+            print "List of points:", self._nodes
+            print "List of boundary edges:", edges
+        elems = triangulate_af(self._nodes, edges)
+        boundaries = [list(b)+[1] for b in edges]
+        if debug:
+            print "List of elements:", elems
+            print "List of boundaries:", boundaries
         return Mesh(self._nodes, elems, boundaries)
 
 class Mesh:
