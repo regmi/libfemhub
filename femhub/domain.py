@@ -24,9 +24,10 @@ class Domain:
                     {0:[1],1:[0,2],2:[1]})
 
         """
-        import triangulation
-        vertices, edges = triangulation.convert_graph(vertices, edges)
-        edges = triangulation.sort_edges(edges)
+        from triangulation import convert_graph, find_loops, orient_loops
+        vertices, edges = convert_graph(vertices, edges)
+        loops = find_loops(edges)
+        edges = orient_loops(vertices, loops)
         d = Domain(vertices, edges)
         d.normalize()
         return d

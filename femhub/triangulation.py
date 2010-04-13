@@ -95,32 +95,6 @@ def plot_tria_mesh(pts_list, tria_mesh):
        plot(x_array, y_array, "g-")
    savefig("a.png")
 
-def sort_edges(edges):
-    n = []
-    edges = edges[:]
-    while edges != []:
-        if n == []:
-            e = edges[0]
-            n.append(e)
-            del edges[0]
-        else:
-            last_i = n[-1][1]
-            ok = False
-            for i, e in enumerate(edges):
-                if e[0] == last_i:
-                    n.append(e)
-                    del edges[i]
-                    ok = True
-                    break
-                elif e[1] == last_i:
-                    n.append((e[1], e[0]))
-                    del edges[i]
-                    ok = True
-                    break
-            if not ok:
-                raise Exception("Missing some boundary edge")
-    return n
-
 def convert_graph(vertices, edges):
     pts_list = []
     _edges = []
@@ -295,8 +269,86 @@ def edges_is_closed_curve(edges):
     e_prev = first = edges[0]
     for e in edges[1:]:
         if e_prev[1] != e[0]:
-            return False
+            if e_prev[1] == first[0]:
+                # new loop
+                first = e
+            else:
+                return False
         e_prev = e
     if e_prev[1] != first[0]:
         return False
     return True
+
+def check_regularity(edges):
+    """
+    Checks, whether the boundary is closed and whether exactly 2 edges are
+    sharing a vertex.
+
+    Otherwise it raises the proper exception.
+    """
+    for a, b in edges:
+        counter_a = 0
+        counter_b = 0
+        for x, y in edges:
+            if a == x or a == y:
+                counter_a += 1
+            if b == x or b == y:
+                counter_b += 1
+        assert (counter_a > 0) and (counter_b > 0)
+        if (counter_a == 1) or (counter_b == 1):
+            raise Exception("Boundary is not closed.")
+        if (counter_a > 2) or (counter_b > 2):
+            raise Exception("More than two edges share a vertex.")
+
+def find_loops(edges):
+    """
+    Extracts all loops from edges and return them as a sorted list of edges.
+
+    It also checks for a regularity of the mesh and it raises an exception if
+    something goes wrong.
+    """
+    check_regularity(edges)
+    loops = []
+    edges = edges[:]
+    start_i = -1
+    while edges != []:
+        if start_i == -1:
+            e = edges[0]
+            n = [e]
+            del edges[0]
+            start_i = n[-1][0]
+            last_i = n[-1][1]
+        else:
+            ok = False
+            for i, e in enumerate(edges):
+                if e[0] == last_i:
+                    n.append(e)
+                    del edges[i]
+                    ok = True
+                    break
+                elif e[1] == last_i:
+                    n.append((e[1], e[0]))
+                    del edges[i]
+                    ok = True
+                    break
+            if not ok:
+                if start_i == last_i:
+                    start_i = -1
+                    loops.append(n)
+                else:
+                    raise Exception("Missing some boundary edge")
+            last_i = n[-1][1]
+    if start_i == last_i:
+        loops.append(n)
+    else:
+        raise Exception("Missing some boundary edge")
+    return loops
+
+def orient_loops(nodes, loops):
+    n = []
+    for loop in loops:
+        if polygon_area(nodes, loop) < 0:
+            n.extend(edges_flip_orientation(loop))
+        else:
+            n.extend(loop)
+    return n
