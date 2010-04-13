@@ -232,3 +232,71 @@ def show_graph_editor(vertices, edges):
     """ % {"vertices": vertices, "edges": edges, "num_vertices": len(vertices),
             "cell_id": 2}
     print a
+
+def polygon_area(nodes, edges):
+    """
+    Calculates the (oriented) area of the polygon.
+
+    It ignores any possible holes in the polygon.
+    """
+    # extract the (x, y) coordinates of the boundary vertices in the order
+    x = []
+    y = []
+    for e in edges:
+        n = nodes[e[0]]
+        x.append(n[0])
+        y.append(n[1])
+        n = nodes[e[1]]
+        x.append(n[0])
+        y.append(n[1])
+    # "close" the polygon
+    x.append(x[0])
+    x.append(x[1])
+    y.append(y[0])
+    y.append(y[1])
+    # compute the area
+    a = 0.0;
+    for i in range(1, len(x)-1):
+        a += x[i] * (y[i+1] - y[i-1])
+    a /= 2;
+    return a
+
+def edges_flip_orientation(edges):
+    """
+    Flips the edges curve orientation.
+
+    This is useful for the triangulation algorithm.
+
+    Example:
+
+    >>> edges_flip_orientation([(0, 1), (1, 2), (2, 6), (6, 0)])
+    [(0, 6), (6, 2), (2, 1), (1, 0)]
+
+    """
+    edges_flipped = []
+    for e in edges:
+        edges_flipped.insert(0, (e[1], e[0]))
+    return edges_flipped
+
+def edges_is_closed_curve(edges):
+    """
+    Returns True if the edges form a closed curve, otherwise False.
+
+    This is useful to check before attempting to do a triangulation.
+
+    Example:
+
+    >>> edges_is_closed_curve([(0, 1), (1, 2), (2, 3), (3, 0)])
+    True
+    >>> edges_is_closed_curve([(0, 1), (2, 3), (3, 0)])
+    False
+
+    """
+    e_prev = first = edges[0]
+    for e in edges[1:]:
+        if e_prev[1] != e[0]:
+            return False
+        e_prev = e
+    if e_prev[1] != first[0]:
+        return False
+    return True
