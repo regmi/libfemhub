@@ -255,7 +255,7 @@ def polygon_area(nodes, edges):
     y.append(y[0])
     y.append(y[1])
     # compute the area
-    a = 0.0;
+    a = 0.0
     for i in range(1, len(x)-1):
         a += x[i] * (y[i+1] - y[i-1])
     a /= 2;
