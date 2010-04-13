@@ -125,6 +125,67 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
         pts_list = [[v[0]/_max, v[1]/_max] for v in pts_list]
         self._nodes = pts_list
 
+    def edges_flip_orientation(self, edges):
+        """
+        Flips the edges curve orientation.
+
+        This is useful for the triangulation algorithm.
+
+        Example:
+
+        >>> d = Domain()
+        >>> d.edges_flip_orientation([(0, 1), (1, 2), (2, 6), (6, 0)])
+        [(0, 6), (6, 2), (2, 1), (1, 0)]
+
+        """
+        edges_flipped = []
+        for e in edges:
+            edges_flipped.insert(0, (e[1], e[0]))
+        return edges_flipped
+
+    def edges_is_closed_curve(self, edges):
+        """
+        Returns True if the edges form a closed curve, otherwise False.
+
+        This is useful to check before attempting to do a triangulation.
+
+        Example:
+
+        >>> d = Domain()
+        >>> d.edges_is_closed_curve([(0, 1), (1, 2), (2, 3), (3, 0)])
+        True
+        >>> d.edges_is_closed_curve([(0, 1), (2, 3), (3, 0)])
+        False
+
+        """
+        e_prev = first = edges[0]
+        for e in edges[1:]:
+            if e_prev[1] != e[0]:
+                return False
+            e_prev = e
+        if e_prev[1] != first[0]:
+            return False
+        return True
+
+    @property
+    def boundary_closed(self):
+        """
+        Returns True if the boundary is closed.
+
+        Example:
+
+        >>> d = Domain([[0, 0], [0, 1], [1, 1], [1, 0]],
+                [(0, 1), (1, 2), (2, 3), (3, 0)])
+        >>> d.boundary_closed
+        True
+        >>> d = Domain([[0, 0], [0, 1], [1, 1], [1, 0]],
+                [(0, 1), (2, 3), (3, 0)])
+        >>> d.boundary_closed
+        False
+
+        """
+        return self.edges_is_closed_curve(self._edges)
+
     def triangulate(self):
         import triangulation
         print "Triangulating..."
