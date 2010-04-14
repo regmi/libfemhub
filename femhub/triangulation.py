@@ -349,10 +349,8 @@ def orient_loops(nodes, loops):
     area_loop_list = []
     for loop in loops:
         area_loop_list.append((polygon_area(nodes, loop), loop))
-    print area_loop_list
     area_loop_list.sort(key=lambda x: abs(x[0]))
     area_loop_list.reverse()
-    print area_loop_list
     first = True
     for area, loop in area_loop_list:
         if first:
