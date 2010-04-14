@@ -51,6 +51,14 @@ class Domain:
     boundary edges:
         %s""" % (self._nodes, self._edges)
 
+    @property
+    def nodes(self):
+        return self._nodes
+
+    @property
+    def edges(self):
+        return self._edges
+
     def get_html(self, self_name="d", editor="js"):
         import sagenb.notebook.interact
         self._cell_id_edit = sagenb.notebook.interact.SAGE_CELL_ID
@@ -209,6 +217,22 @@ class Mesh:
         %s
     curves:
         %s""" % (self._nodes, self._elements, self._boundaries, self._curves)
+
+    @property
+    def nodes(self):
+        return self._nodes
+
+    @property
+    def elements(self):
+        return self._elements
+
+    @property
+    def boundaries(self):
+        return self._boundaries
+
+    @property
+    def curves(self):
+        return self._curves
 
     def plot(self):
         import triangulation
