@@ -140,24 +140,7 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
 
         Angles (ratio) are preserved.
         """
-        pts_list = self._nodes
-        _min = 1e10;
-        for v in pts_list:
-            if v[0] < _min:
-                _min = v[0]
-            if v[1] < _min:
-                _min = v[1]
-        _min = float(_min)
-        pts_list = [[v[0]-_min, v[1]-_min] for v in pts_list]
-        _max = -1;
-        for v in pts_list:
-            if v[0] > _max:
-                _max = v[0]
-            if v[1] > _max:
-                _max = v[1]
-        _max = float(_max)
-        pts_list = [[v[0]/_max, v[1]/_max] for v in pts_list]
-        self._nodes = pts_list
+        self.fit_into_rectangle(0, 0, 1, 1)
 
     @property
     def boundary_closed(self):
