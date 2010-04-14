@@ -363,3 +363,33 @@ def orient_loops(nodes, loops):
             n.extend(loop)
         first = False
     return n
+
+
+def ccw(A, B, C):
+    return (C[1]-A[1])*(B[0]-A[0]) > (B[1]-A[1])*(C[0]-A[0])
+
+def intersect(A, B, C, D):
+    return ccw(A, C, D) != ccw(B, C, D) and ccw(A, B, C) != ccw(A, B, D)
+
+def two_edges_intersect(nodes, e1, e2):
+    """
+    Checks whether the two edges intersect.
+
+    It assumes that e1 and e2 are tuples of (a_id, b_id) of ids into the nodes.
+    """
+    A = nodes[e1[0]]
+    B = nodes[e1[1]]
+    C = nodes[e2[0]]
+    D = nodes[e2[1]]
+    return intersect(A, B, C, D)
+
+def any_edges_intersect(nodes, edges):
+    for i in range(len(edges)):
+        for j in range(i+1, len(edges)):
+            e1 = edges[i]
+            e2 = edges[j]
+            if e1[1] == e2[0] or e1[0] == e2[1]:
+                continue
+            if two_edges_intersect(nodes, e1, e2):
+                return True
+    return False
