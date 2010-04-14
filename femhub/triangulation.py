@@ -311,6 +311,8 @@ def find_loops(edges):
     loops = []
     edges = edges[:]
     start_i = -1
+    last_i = -1
+    n = []
     while edges != []:
         if start_i == -1:
             e = edges[0]

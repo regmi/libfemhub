@@ -24,18 +24,20 @@ class Domain:
                     {0:[1],1:[0,2],2:[1]})
 
         """
-        from triangulation import (convert_graph, find_loops, orient_loops,
-                any_edges_intersect)
+        from triangulation import convert_graph
         vertices, edges = convert_graph(vertices, edges)
-        loops = find_loops(edges)
-        edges = orient_loops(vertices, loops)
-        if any_edges_intersect(vertices, edges):
-            raise Exception("Two or more edges intersect.")
         d = Domain(vertices, edges)
         d.normalize()
         return d
 
     def __init__(self, nodes=[], edges=[]):
+        from triangulation import (find_loops, orient_loops,
+                any_edges_intersect)
+        if not (nodes == [] and edges == []):
+            loops = find_loops(edges)
+            edges = orient_loops(nodes, loops)
+            if any_edges_intersect(nodes, edges):
+                raise Exception("Two or more edges intersect.")
         self._nodes = nodes
         self._edges = edges
 
