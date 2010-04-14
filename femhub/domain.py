@@ -33,7 +33,7 @@ class Domain:
     def __init__(self, nodes=[], edges=[]):
         from triangulation import (find_loops, orient_loops,
                 any_edges_intersect)
-        if not (nodes == [] and edges == []):
+        if len(edges) != 0:
             loops = find_loops(edges)
             edges = orient_loops(nodes, loops)
             if any_edges_intersect(nodes, edges):
@@ -141,7 +141,10 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
             if x > max_x: max_x = x
             if y > max_y: max_y = y
         def transform(x, x0, w, min, max):
-            c2 = float(w)/(max-min)
+            if abs(max - min) < 1e-12:
+                c2 = 0
+            else:
+                c2 = float(w)/(max-min)
             c1 = x0 - c2*min
             return c1 + c2*x
         pts_list = [ [
