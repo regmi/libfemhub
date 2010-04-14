@@ -84,12 +84,22 @@ value="%(var_name)s"></td></tr><tr><td><button onclick="
     // This is how to comment out the previous contents of the cell:
     //f = '#' + $('#cell_input_%(cell_id_save)s').val() + '\\n';
 
-    f = '# Automatically generated:\\n';
+    var auto_text = '# Automatically generated:';
+    f = auto_text + '\\n';
     f += g[2] + ' = Domain.from_graph_editor(' + g[1] + ', ' + g[0] + ')';
 
     var eval_below=true; // Set this to 'false' to update the cell above
     if (eval_below == true) {
-        insert_new_cell_after_and_evaluate(%(cell_id)s, f);
+        // See if the next cell was automatically generated and if so, just use
+        // that cell, otherwise create a new cell:
+        next_cell_id = id_of_cell_delta(%(cell_id)s, 1);
+        next_cell_input = get_cell(next_cell_id);
+        if (next_cell_input.value.substring(0, auto_text.length) == auto_text) {
+            next_cell_input.value = f;
+            cell_input_resize(next_cell_id);
+            evaluate_cell(next_cell_id, false);
+        } else
+            insert_new_cell_after_and_evaluate(%(cell_id)s, f);
     } else {
         $('#cell_input_%(cell_id_save)s').val(f);
         cell_input_resize(%(cell_id_save)s);
