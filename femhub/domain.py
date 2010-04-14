@@ -76,7 +76,7 @@ type="hidden" id="graph_name_%(cell_id)s"
 value="%(var_name)s"></td></tr><tr><td><button onclick="
     var f, g, saved_input;
     g = $('#iframe_graph_editor_%(cell_id)s')[0].contentWindow.update_sage();
-    if (g[2] === '') {
+    if (g[2] == '') {
         alert('You need to give a Sage variable name to the graph, before saving it.');
         return;
     }
@@ -86,9 +86,15 @@ value="%(var_name)s"></td></tr><tr><td><button onclick="
 
     f = '# Automatically generated:\\n';
     f += g[2] + ' = Domain.from_graph_editor(' + g[1] + ', ' + g[0] + ')';
-    $('#cell_input_%(cell_id_save)s').val(f);
-    cell_input_resize(%(cell_id_save)s);
-    evaluate_cell(%(cell_id_save)s, false);
+
+    var eval_below=true; // Set this to 'false' to update the cell above
+    if (eval_below == true) {
+        insert_new_cell_after_and_evaluate(%(cell_id)s, f);
+    } else {
+        $('#cell_input_%(cell_id_save)s').val(f);
+        cell_input_resize(%(cell_id_save)s);
+        evaluate_cell(%(cell_id_save)s, false);
+    }
 ">Save</button><button
 onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></table></div></font></html>""" % {"path": path,
                 "cell_id_save": self._cell_id_init,
