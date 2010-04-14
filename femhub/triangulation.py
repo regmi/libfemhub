@@ -84,39 +84,32 @@ def triangulate_af(pts_list, bdy_edges):
     while bdy_edges != []:
         # take the last item from the list of bdy edges (and remove it)
         a,b = bdy_edges.pop()
-        print "elems:", elems
-        print "bdy_edges:", elems
-        print "a, b:", a, b
         c = find_third_point(a, b, pts_list, bdy_edges)
-        print "c:", c
         elems.append((a,b,c))
         if is_boundary_edge(c, a, bdy_edges):
-            print "removing:", (c, a)
             bdy_edges.remove((c,a))
         else:
-            print "adding:", (a, c)
             bdy_edges.append((a,c))
         if is_boundary_edge(b, c, bdy_edges):
-            print "removing:", (b, c)
             bdy_edges.remove((b,c))
         else:
-            print "adding:", (c, b)
             bdy_edges.append((c,b))
     return elems
 
 # Plot triangular mesh
 def plot_tria_mesh(pts_list, tria_mesh):
-   clf()
-   label=""
-   for elem in tria_mesh:
-       a,b,c = elem
-       ax,ay = pts_list[a]
-       bx,by = pts_list[b]
-       cx,cy = pts_list[c]
-       x_array = array([ax,bx,cx,ax])
-       y_array = array([ay,by,cy,ay])
-       plot(x_array, y_array, "g-")
-   savefig("a.png")
+    clf()
+    label=""
+    for elem in tria_mesh:
+        a,b,c = elem
+        ax,ay = pts_list[a]
+        bx,by = pts_list[b]
+        cx,cy = pts_list[c]
+        x_array = array([ax,bx,cx,ax])
+        y_array = array([ay,by,cy,ay])
+        plot(x_array, y_array, "g-")
+    axis("equal")
+    savefig("a.png")
 
 def convert_graph(vertices, edges):
     pts_list = []

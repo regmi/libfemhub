@@ -106,6 +106,34 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
                 self_name = var
         print self.get_html(self_name=self_name, editor=editor)
 
+    def fit_into_rectangle(self, x0, y0, w, h):
+        """
+        Rescales and shifts the domain into the rectangle.
+
+        The rectangle is specified by the bottom left point (x0, y0) and the
+        width "w" and height "h".
+
+        Angles (ratio) are preserved.
+        """
+        if w <= 0 or h <= 0:
+            raise Exception("The width and height must be positive.")
+        pts_list = self._nodes
+        min_x, min_y = max_x, max_y = pts_list[0]
+        for x, y in pts_list:
+            if x < min_x: min_x = x
+            if y < min_y: min_y = y
+            if x > max_x: max_x = x
+            if y > max_y: max_y = y
+        def transform(x, x0, w, min, max):
+            c2 = w/(max-min)
+            c1 = x0 - c2*min
+            return c1 + c2*x
+        pts_list = [ [
+                transform(x, x0, w, min_x, max_x),
+                transform(y, y0, h, min_y, max_y)
+                ] for x, y in pts_list]
+        self._nodes = pts_list
+
     def normalize(self):
         """
         Transforms the domain coordinates into (0, 1)x(0, 1).
