@@ -2,12 +2,24 @@ import sys
 
 class Domain:
     """
-    Represents a FE domain.
+    Represents an FE domain.
 
     Currently the domain is 2D and is defined by a set of nodes and (boundary)
     edges. It can be made more general in the future.
 
-    The edges are always sorted.
+    The edges are always sorted and positively oriented and the boundary is
+    closed. If you supply edges that don't form a simple boundary, an exception
+    is raised.
+
+    Example:
+
+    >>> d = Domain([[0, 1], [1, 1], [1, 0], [0, 0]], [(0, 3), (3, 2), (2, 1), (1, 0)])
+    >>> d.nodes
+    [[0, 1], [1, 1], [1, 0], [0, 0]]
+    >>> d.edges
+    [(0, 3), (3, 2), (2, 1), (1, 0)]
+    >>> d.edit() # launches a javascript editor
+
     """
 
     @classmethod
@@ -20,8 +32,12 @@ class Domain:
 
         Example:
 
-        >>> d = Domain.from_graph_editor({0:[35,35],1:[338,14],2:[315,315]},
-                    {0:[1],1:[0,2],2:[1]})
+        >>> d = Domain.from_graph_editor({0:[69,269],1:[284,267],2:[285,107],
+                3:[75,99]}, {0:[1,3],1:[0,2],2:[1,3],3:[2,0]})
+        >>> d.nodes
+        [[0.0, 0.99999999999999989], [0.99537037037037024, 0.98823529411764699], [1.0, 0.047058823529411709], [0.02777777777777779, 0.0]]
+        >>> d.edges
+        [(0, 3), (3, 2), (2, 1), (1, 0)]
 
         """
         from triangulation import convert_graph
@@ -53,13 +69,47 @@ class Domain:
 
     @property
     def nodes(self):
+        """
+        Return the nodes.
+
+        Example:
+
+        >>> d = Domain([[0, 1], [1, 1], [1, 0], [0, 0]], [(0, 3), (3, 2), (2, 1), (1, 0)])
+        >>> d.nodes
+        [[0, 1], [1, 1], [1, 0], [0, 0]]
+        >>> d.edges
+        [(0, 3), (3, 2), (2, 1), (1, 0)]
+
+        """
         return self._nodes
 
     @property
     def edges(self):
+        """
+        Return the edges.
+
+        Example:
+
+        >>> d = Domain([[0, 1], [1, 1], [1, 0], [0, 0]], [(0, 3), (3, 2), (2, 1), (1, 0)])
+        >>> d.nodes
+        [[0, 1], [1, 1], [1, 0], [0, 0]]
+        >>> d.edges
+        [(0, 3), (3, 2), (2, 1), (1, 0)]
+
+        """
         return self._edges
 
     def get_html(self, self_name="d", editor="js"):
+        """
+        Returns an html to launch an editor.
+
+        Example:
+
+        >>> d = Domain([[0, 1], [1, 1], [1, 0], [0, 0]], [(0, 3), (3, 2), (2, 1), (1, 0)])
+        >>> d.get_html()
+        '<html>...</html>'
+
+        """
         import sagenb.notebook.interact
         self._cell_id_edit = sagenb.notebook.interact.SAGE_CELL_ID
         if editor != "js":
@@ -101,6 +151,16 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
                 "var_name": self_name}
 
     def edit(self, editor="js"):
+        """
+        Launches a javascript editor to edit the domain.
+
+        Example:
+
+        >>> d = Domain([[0, 1], [1, 1], [1, 0], [0, 0]], [(0, 3), (3, 2), (2, 1), (1, 0)])
+        >>> d.edit()
+        [prints an html code]
+
+        """
         self_name = "d"
         locs = sys._getframe(1).f_locals
         for var in locs:
@@ -116,6 +176,19 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
         width "w" and height "h".
 
         Angles (ratio) are preserved.
+
+        Example:
+
+        >>> d = Domain([[0, 1], [1, 1], [1, 0], [0, 0]], [(0, 3), (3, 2), (2, 1), (1, 0)])
+        >>> d.nodes
+        [[0, 1], [1, 1], [1, 0], [0, 0]]
+        >>> d.fit_into_rectangle(-1, -1, 2, 2)
+        >>> d.nodes
+        [[-1.0, 1.0], [1.0, 1.0], [1.0, -1.0], [-1.0, -1.0]]
+        >>> d.fit_into_rectangle(0, 3, 5, 6)
+        >>> d.nodes
+        [[0.0, 9.0], [5.0, 9.0], [5.0, 3.0], [0.0, 3.0]]
+
         """
         if w <= 0 or h <= 0:
             raise Exception("The width and height must be positive.")
@@ -144,6 +217,16 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
         Transforms the domain coordinates into (0, 1)x(0, 1).
 
         Angles (ratio) are preserved.
+
+        Example:
+
+        >>> d = Domain([[0, 9], [5, 9], [5, 3], [0, 3]], [(0, 3), (3, 2), (2, 1), (1, 0)])
+        >>> d.nodes
+        [[0, 9], [5, 9], [5, 3], [0, 3]]
+        >>> d.normalize()
+        >>> d.nodes
+        [[0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.0, 0.0]]
+
         """
         self.fit_into_rectangle(0, 0, 1, 1)
 
@@ -172,11 +255,41 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
         Calculates the (oriented) area of the domain.
 
         It ignores any possible holes in the domain.
+
+        Example:
+
+        >>> d = Domain([[0, 9], [5, 9], [5, 3], [0, 3]], [(0, 3), (3, 2), (2, 1), (1, 0)])
+        >>> d.boundary_area()
+        30.0
+        >>> d.normalize()
+        >>> d.boundary_area()
+        1.0
+
         """
         from triangulation import polygon_area
         return polygon_area(self._nodes, self._edges)
 
     def triangulate(self, debug=False):
+        """
+        Triangulate the domain.
+
+        Returns an instance of the Mesh() class that contains the triangular
+        mesh.
+
+        Example:
+
+        >>> d = Domain([[0, 1], [1, 1], [1, 0], [0, 0]], [(0, 3), (3, 2), (2, 1), (1, 0)])
+        >>> m = d.triangulate()
+        >>> m
+        <femhub.domain.Mesh instance at 0x2d4c0e0>
+        >>> m.nodes
+        [[0, 1], [1, 1], [1, 0], [0, 0]]
+        >>> m.elements
+        [(1, 0, 2), (2, 0, 3)]
+        >>> m.boundaries
+        [[0, 3, 1], [3, 2, 1], [2, 1, 1], [1, 0, 1]]
+
+        """
         from triangulation import triangulate_af
         if debug:
             print "Triangulating..."
@@ -199,6 +312,19 @@ class Mesh:
 
     It contains methods to export this mesh in the hermes2d (and other)
     formats.
+
+    Example:
+
+    >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+    >>> m.nodes
+    [[0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.0, 0.0]]
+    >>> m.elements
+    [[1, 0, 2], [2, 0, 3]]
+    >>> m.boundaries
+    [[2, 0, 1], [2, 0, 1], [2, 0, 1], [2, 0, 1]]
+    >>> m.curves
+    []
+
     """
 
     def __init__(self, nodes=[], elements=[], boundaries=[], curves=[]):
@@ -220,31 +346,110 @@ class Mesh:
 
     @property
     def nodes(self):
+        """
+        Returns the mesh nodes.
+
+        Example:
+
+        >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+        >>> m.nodes
+        [[0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.0, 0.0]]
+        >>> m.elements
+        [[1, 0, 2], [2, 0, 3]]
+        >>> m.boundaries
+        [[2, 0, 1], [2, 0, 1], [2, 0, 1], [2, 0, 1]]
+        >>> m.curves
+        []
+
+        """
         return self._nodes
 
     @property
     def elements(self):
+        """
+        Returns the mesh elements.
+
+        Example:
+
+        >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+        >>> m.nodes
+        [[0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.0, 0.0]]
+        >>> m.elements
+        [[1, 0, 2], [2, 0, 3]]
+        >>> m.boundaries
+        [[2, 0, 1], [2, 0, 1], [2, 0, 1], [2, 0, 1]]
+        >>> m.curves
+        []
+
+        """
         return self._elements
 
     @property
     def boundaries(self):
+        """
+        Returns the mesh boundaries.
+
+        Example:
+
+        >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+        >>> m.nodes
+        [[0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.0, 0.0]]
+        >>> m.elements
+        [[1, 0, 2], [2, 0, 3]]
+        >>> m.boundaries
+        [[2, 0, 1], [2, 0, 1], [2, 0, 1], [2, 0, 1]]
+        >>> m.curves
+        []
+
+        """
         return self._boundaries
 
     @property
     def curves(self):
+        """
+        Returns the mesh curves.
+
+        Example:
+
+        >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+        >>> m.nodes
+        [[0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.0, 0.0]]
+        >>> m.elements
+        [[1, 0, 2], [2, 0, 3]]
+        >>> m.boundaries
+        [[2, 0, 1], [2, 0, 1], [2, 0, 1], [2, 0, 1]]
+        >>> m.curves
+        []
+
+        """
         return self._curves
 
     def plot(self):
+        """
+        Plots the mesh using matplotlib.
+
+        Example:
+
+        >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+        >>> m.plot() # plots the mesh
+
+        """
         import triangulation
         triangulation.plot_tria_mesh(self._nodes, self._elements)
 
-    def convert_nodes(self, a):
+    def _convert_nodes(self, a):
+        """
+        Internal function: prepares nodes for the flash.
+        """
         s = ""
         for x, y in a:
             s += "%s %s," % (x, y)
         return s
 
-    def convert_elements(self, a):
+    def _convert_elements(self, a):
+        """
+        Internal function: prepares elements for the flash.
+        """
         s = ""
         for e in a:
             if len(e) == 3:
@@ -253,19 +458,35 @@ class Mesh:
                 s += "%s %s %s %s 0," % tuple(e)
         return s
 
-    def convert_boundaries(self, a):
+    def _convert_boundaries(self, a):
+        """
+        Internal function: prepares boundaries for the flash.
+        """
         s = ""
         for b in a:
             s += ("%s %s %s,") % tuple(b)
         return s
 
-    def convert_curves(self, a):
+    def _convert_curves(self, a):
+        """
+        Internal function: prepares curves for the flash.
+        """
         s = ""
         for c in a:
             s += ("%s %s %s,") % tuple(c)
         return s
 
     def get_html(self, self_name="d", editor="flex"):
+        """
+        Returns an html for launching the flex editor.
+
+        Example:
+
+        >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+        >>> m.get_html()
+        '<html>...</html>'
+
+        """
         import sagenb.notebook.interact
         self._cell_id_edit = sagenb.notebook.interact.SAGE_CELL_ID
 
@@ -288,15 +509,30 @@ class Mesh:
     <!--<![endif]-->
 </object>
 </html>""" % {"path": path, "cn": self._cell_id_edit,
-                "nodes": self.convert_nodes(self._nodes),
-                "elements": self.convert_elements(self._elements),
-                "boundaries": self.convert_boundaries(self._boundaries),
-                "curves": self.convert_curves(self._curves),
+                "nodes": self._convert_nodes(self._nodes),
+                "elements": self._convert_elements(self._elements),
+                "boundaries": self._convert_boundaries(self._boundaries),
+                "curves": self._convert_curves(self._curves),
                 "var_name": self_name}
         else:
             raise Exception("Not implemented.")
 
     def get_mesh(self, lib="hermes2d"):
+        """
+        Returns a mesh in the FE solver format.
+
+        lib == "hermes2d" ... returns the hermes2d Mesh
+
+        Currently only hermes2d is implemented.
+
+        Example:
+
+        >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+        >>> h = m.get_mesh()
+        >>> h
+        <hermes2d._hermes2d.Mesh object at 0x7f07284721c8>
+
+        """
         if lib == "hermes2d":
             from hermes2d import Mesh
             m = Mesh()
@@ -311,7 +547,14 @@ class Mesh:
 
     def edit(self, editor="flex"):
         """
-        editor .... either "flex" or "js"
+        Launches a flex editor to edit the mesh.
+
+        Example:
+
+        >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+        >>> m.edit()
+        [prints an html code]
+
         """
 
         self_name = "d"
