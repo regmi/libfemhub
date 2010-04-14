@@ -346,9 +346,22 @@ def find_loops(edges):
 
 def orient_loops(nodes, loops):
     n = []
+    area_loop_list = []
     for loop in loops:
-        if polygon_area(nodes, loop) < 0:
+        area_loop_list.append((polygon_area(nodes, loop), loop))
+    print area_loop_list
+    area_loop_list.sort(key=lambda x: abs(x[0]))
+    area_loop_list.reverse()
+    print area_loop_list
+    first = True
+    for area, loop in area_loop_list:
+        if first:
+            flip = polygon_area(nodes, loop) < 0
+        else:
+            flip = polygon_area(nodes, loop) > 0
+        if flip:
             n.extend(edges_flip_orientation(loop))
         else:
             n.extend(loop)
+        first = False
     return n
