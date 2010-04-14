@@ -29,25 +29,31 @@ def criterion(a, b, c, pts_list):
    len_v = sqrt(vx*vx + vy*vy)
    return (ux*vx + uy*vy)/(len_u*len_v)
 
-# Take a boundary edge (a,b), and in the list of points
-# find a point 'c' that lies on the left of ab and maximizes
-# the angle acb
-def find_third_point(a, b, pts_list):
-   found = 0
-   minimum = exp(100)   #this is dirty
-   c_index = -1
-   pt_index = -1
-   for c_point in pts_list:
-       c_index += 1
-       if c_index != a and c_index != b and is_on_the_left(c_index, a, b, pts_list):
-           crit = criterion(a, b, c_index, pts_list)
-           if crit < minimum:
-               minimum = crit
-               pt_index = c_index
-               found = 1
-   if found == 0:
-       raise TriangulationError("ERROR: Optimal point not found in find_third_point().")
-   return pt_index
+def find_third_point(a, b, pts_list, edges):
+    """
+    Take a boundary edge (a,b), and in the list of points
+    find a point 'c' that lies on the left of ab and maximizes
+    the angle acb
+    """
+    found = 0
+    minimum = exp(100)   #this is dirty
+    c_index = -1
+    pt_index = -1
+    for c_point in pts_list:
+        c_index += 1
+        if c_index != a and c_index != b and is_on_the_left(c_index, a, b, pts_list):
+            edge_intersects = \
+                    edge_intersects_edges((a, c_index), pts_list, edges) or \
+                    edge_intersects_edges((b, c_index), pts_list, edges)
+            if not edge_intersects:
+                crit = criterion(a, b, c_index, pts_list)
+                if crit < minimum:
+                    minimum = crit
+                    pt_index = c_index
+                    found = 1
+    if found == 0:
+        raise TriangulationError("ERROR: Optimal point not found in find_third_point().")
+    return pt_index
 
 # If the point 'c' belong to a boundary edge, return False,
 # otherwise return True
@@ -57,29 +63,46 @@ def lies_inside(c, bdy_edges):
        if c == a or c == b: return False
    return True
 
-# Checks whether edge (a, b) is in the list of boundary edges
 def is_boundary_edge(a, b, bdy_edges):
-   for edge in bdy_edges:
-       a0, b0 = edge
-       if a == a0 and b == b0: return True
-   return False
+    """
+    Checks whether edge (a, b) is in the list of boundary edges
+    """
+    for edge in bdy_edges:
+        a0, b0 = edge
+        if a == a0 and b == b0:
+            return True
+    return False
 
-# Create a triangulation using the advancing front method
 def triangulate_af(pts_list, bdy_edges):
-   # create empty list of elements
-   elems = []
-   bdy_edges = bdy_edges[:]
-   # main loop
-   while bdy_edges != []:
-       # take the last item from the list of bdy edges (and remove it)
-       a,b = bdy_edges.pop()
-       c = find_third_point(a, b, pts_list)
-       elems.append((a,b,c))
-       if is_boundary_edge(c, a, bdy_edges): bdy_edges.remove((c,a))
-       else: bdy_edges.append((a,c))
-       if is_boundary_edge(b, c, bdy_edges): bdy_edges.remove((b,c))
-       else: bdy_edges.append((c,b))
-   return elems
+    """
+    Create a triangulation using the advancing front method.
+    """
+    # create empty list of elements
+    elems = []
+    bdy_edges = bdy_edges[:]
+    # main loop
+    while bdy_edges != []:
+        # take the last item from the list of bdy edges (and remove it)
+        a,b = bdy_edges.pop()
+        print "elems:", elems
+        print "bdy_edges:", elems
+        print "a, b:", a, b
+        c = find_third_point(a, b, pts_list, bdy_edges)
+        print "c:", c
+        elems.append((a,b,c))
+        if is_boundary_edge(c, a, bdy_edges):
+            print "removing:", (c, a)
+            bdy_edges.remove((c,a))
+        else:
+            print "adding:", (a, c)
+            bdy_edges.append((a,c))
+        if is_boundary_edge(b, c, bdy_edges):
+            print "removing:", (b, c)
+            bdy_edges.remove((b,c))
+        else:
+            print "adding:", (c, b)
+            bdy_edges.append((c,b))
+    return elems
 
 # Plot triangular mesh
 def plot_tria_mesh(pts_list, tria_mesh):
@@ -386,6 +409,9 @@ def two_edges_intersect(nodes, e1, e2):
     return intersect(A, B, C, D)
 
 def any_edges_intersect(nodes, edges):
+    """
+    Returns True if any two edges intersect.
+    """
     for i in range(len(edges)):
         for j in range(i+1, len(edges)):
             e1 = edges[i]
@@ -394,4 +420,16 @@ def any_edges_intersect(nodes, edges):
                 continue
             if two_edges_intersect(nodes, e1, e2):
                 return True
+    return False
+
+def edge_intersects_edges(e1, nodes, edges):
+    """
+    Returns True if "e1" intersects any edge from "edges".
+    """
+    for i in range(len(edges)):
+        e2 = edges[i]
+        if e1[1] == e2[0] or e1[0] == e2[1]:
+            continue
+        if two_edges_intersect(nodes, e1, e2):
+            return True
     return False
