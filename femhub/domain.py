@@ -125,7 +125,7 @@ onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></tab
             if x > max_x: max_x = x
             if y > max_y: max_y = y
         def transform(x, x0, w, min, max):
-            c2 = w/(max-min)
+            c2 = float(w)/(max-min)
             c1 = x0 - c2*min
             return c1 + c2*x
         pts_list = [ [
