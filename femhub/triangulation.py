@@ -121,115 +121,13 @@ def convert_graph(vertices, edges):
                 _edges.append((i, n))
     return pts_list, _edges
 
-def doit(edges, vertices):
-    pts_list, bdy_edges = convert_graph(edges, vertices)
-    print pts_list
-    print bdy_edges
-    boundary = [b+(1,) for b in bdy_edges]
-    #print pts_list
-    #print bdy_edges
-    #print boundary
-    # Example (unit square diagonally split into 4 triangles)
-    #pts_list = [(0,0), (1,0), (0,1), (1,1), (0.5,0.5)]
-    #print "List of points:", pts_list
-    #bdy_edges = [(0,1), (1,3), (3,2), (2,0)]
-    #print "List of boundary edges:", bdy_edges
-    elems = triangulate_af(pts_list, bdy_edges)
-    #print "List of elements:", elems
-    #plot_tria_mesh(pts_list, elems)
-
-    # Hermes2D: Example 03 (poisson)
-    # This example shows how to solve a first simple PDE.
-    #    - create the mesh
-    #    - perform initial refinements
-    #    - create a H1 space over the mesh
-    #    - define weak formulation
-    #    - initialize matrix solver
-    #    - assemble and solve the matrix system
-    #    - visualize the solution
-    #
-    # PDE: Poisson equation -Laplace u = CONST_F with homogeneous (zero)
-    #      Dirichlet boundary conditions.
-
-    from hermes2d import Mesh, MeshView, H1Shapeset, PrecalcShapeset, H1Space, \
-           WeakForm, Solution, ScalarView, LinSystem, DummySolver
-    from hermes2d.forms import set_forms
-    from hermes2d.examples.c03 import set_bc
-
-    mesh = Mesh()
-
-    # Creates a mesh from a list of nodes, elements, boundary and nurbs.
-    mesh.create(pts_list, elems, boundary, [])
-
-    #mesh.refine_element(0)
-    shapeset = H1Shapeset()
-    pss = PrecalcShapeset(shapeset)
-
-    # Create an H1 space
-    space = H1Space(mesh, shapeset)
-    space.set_uniform_order(5)
-    set_bc(space)
-    space.assign_dofs()
-
-    # Initialize the discrete problem
-    wf = WeakForm(1)
-    set_forms(wf)
-
-    solver = DummySolver()
-    sys = LinSystem(wf, solver)
-    sys.set_spaces(space)
-    sys.set_pss(pss)
-
-    # Assemble the stiffness matrix and solve the system
-    sys.assemble()
-    A = sys.get_matrix()
-    b = sys.get_rhs()
-    from scipy.sparse.linalg import cg
-    x, res = cg(A, b)
-    sln = Solution()
-    sln.set_fe_solution(space, pss, x)
-
-    # Display the Solution
-    view = ScalarView("Solution")
-    view.show(sln, lib="mayavi", filename="a.png", notebook=True)
-
-    # Display the Mesh
-    mview = MeshView()
-    mview.show(mesh, lib="mpl", method="orders", filename="b.png", notebook=True)
-    from enthought.mayavi import mlab
-    mlab.clf()
-
-    # Positioning the images
-    print """<html><table border=1><tr><td><span style="position: relative; top: 33px;"><img src="cell://a.png" width="320" height="280"></span></td><td><img src="cell://b.png" width="540" height="405"></td></tr></table></html>"""
-
-def show_graph_editor(vertices, edges):
-    a = """
-    <html><font color='black'><div id="graph_editor_2"><table><tbody><tr><td><iframe
-    style="width: 800px; height: 400px; border: 0;" id="iframe_graph_editor_2"
-    src="/javascript/graph_editor/graph_editor.html?cell_id=2"></iframe><input
-    type="hidden" id="graph_data_2" value="num_vertices=%(num_vertices)s;edges=%(edges)s;pos=%(vertices)s;"><input
-    type="hidden" id="graph_name_2" value=""></td></tr><tr><td><button onclick="
-        var f, g, saved_input;
-        g = $('#iframe_graph_editor_2')[0].contentWindow.update_sage();
-
-        f = 'vertices, edges = convert_graph(' + g[1] + ', ' + g[0] + ')\\n';
-        f += 'show_graph_editor(vertices, edges)';
-        $('#cell_input_%(cell_id)s').val(f);
-        cell_input_resize(%(cell_id)s);
-        evaluate_cell(%(cell_id)s, false);
-    ">Save</button><button onclick="cell_delete_output(%(cell_id)s);">Close</button></td></tr></tbody></table></
-    div></font></html>
-    """ % {"vertices": vertices, "edges": edges, "num_vertices": len(vertices),
-            "cell_id": 2}
-    print a
-
 def polygon_area(nodes, edges):
     """
     Calculates the (oriented) area of the polygon.
 
     It ignores any possible holes in the polygon.
     """
-    # extract the (x, y) coordinates of the boundary vertices in the order
+    # extract the (x, y) coordinates of the boundary nodes in the order
     x = []
     y = []
     for e in edges:
@@ -298,7 +196,7 @@ def edges_is_closed_curve(edges):
 def check_regularity(edges):
     """
     Checks, whether the boundary is closed and whether exactly 2 edges are
-    sharing a vertex.
+    sharing a node.
 
     Otherwise it raises the proper exception.
     """
@@ -314,7 +212,7 @@ def check_regularity(edges):
         if (counter_a == 1) or (counter_b == 1):
             raise Exception("Boundary is not closed.")
         if (counter_a > 2) or (counter_b > 2):
-            raise Exception("More than two edges share a vertex.")
+            raise Exception("More than two edges share a node.")
 
 def find_loops(edges):
     """

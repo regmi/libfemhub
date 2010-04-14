@@ -11,11 +11,11 @@ class Domain:
     """
 
     @classmethod
-    def from_graph_editor(cls, vertices, edges):
+    def from_graph_editor(cls, nodes, edges):
         """
         Constructs the Domain() class from the output of the graph_editor.
 
-        The graph_editor returns vertices and edges in a specific format (as
+        The graph_editor returns nodes and edges in a specific format (as
         dictionaries), so we need to convert them into the Domain() format.
 
         Example:
@@ -25,8 +25,8 @@ class Domain:
 
         """
         from triangulation import convert_graph
-        vertices, edges = convert_graph(vertices, edges)
-        d = Domain(vertices, edges)
+        nodes, edges = convert_graph(nodes, edges)
+        d = Domain(nodes, edges)
         d.normalize()
         return d
 
