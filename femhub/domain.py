@@ -385,6 +385,22 @@ class Mesh:
         return self._elements
 
     @property
+    def elems(self):
+        """
+        Returns the mesh elements.
+
+        This is a shortcut for self.elements.
+
+        Example:
+
+        >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+        >>> m.elems
+        [[1, 0, 2], [2, 0, 3]]
+
+        """
+        return self.elements
+
+    @property
     def boundaries(self):
         """
         Returns the mesh boundaries.
@@ -403,6 +419,24 @@ class Mesh:
 
         """
         return self._boundaries
+
+    @property
+    def bdy(self):
+        """
+        Returns the mesh boundaries.
+
+        This is a shortcut for bdy.
+
+        Example:
+
+        >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+        >>> m.bdy
+        [[2, 0, 1], [2, 0, 1], [2, 0, 1], [2, 0, 1]]
+        >>> m.curves
+        []
+
+        """
+        return self.boundaries
 
     @property
     def curves(self):
@@ -436,6 +470,18 @@ class Mesh:
         """
         import triangulation
         triangulation.plot_tria_mesh(self._nodes, self._elements)
+
+    def show(self):
+        """
+        Plots the mesh using matplotlib.
+
+        Example:
+
+        >>> m = Mesh([[0.0,1.0],[1.0,1.0],[1.0,0.0],[0.0,0.0],],[[1,0,2],[2,0,3],],[[2,0,1],[2,0,1],[2,0,1],[2,0,1],],[])
+        >>> m.show() # plots the mesh
+
+        """
+        self.plot()
 
     def _convert_nodes(self, a):
         """
