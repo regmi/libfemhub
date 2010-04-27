@@ -458,7 +458,7 @@ class Mesh:
         """
         return self._curves
 
-    def plot(self):
+    def plot(self, filename="a.png"):
         """
         Plots the mesh using matplotlib.
 
@@ -469,9 +469,9 @@ class Mesh:
 
         """
         import triangulation
-        triangulation.plot_tria_mesh(self._nodes, self._elements)
+        triangulation.plot_tria_mesh(self._nodes, self._elements, filename)
 
-    def show(self):
+    def show(self, filename="a.png"):
         """
         Plots the mesh using matplotlib.
 
@@ -481,7 +481,7 @@ class Mesh:
         >>> m.show() # plots the mesh
 
         """
-        self.plot()
+        self.plot(filename)
 
     def _convert_nodes(self, a):
         """
