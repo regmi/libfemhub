@@ -1,10 +1,15 @@
 # Plot solution for mesh editor on the online lab
-def plotsln(mesh, sln, colorbar=False, view=(0,0), filename="a.png"):
+def plotsln(mesh, z=None, sln=None, colorbar=False, view=(0,0), filename="a.png"):
     x = [n[0] for n in mesh.nodes]
     y = [n[1] for n in mesh.nodes]
-    z = [0]*len(y)
+    if z == None:
+        try:
+            z = [n[2] for n in mesh.nodes]
+        except IndexError:
+            z = [0]*len(y)
     from enthought.mayavi import mlab
     mlab.options.offscreen = True
+    mlab.clf()
     #mlab.options.show_scalar_bar = False
     mlab.triangular_mesh(x, y, z, mesh.elems, scalars=sln)
     engine = mlab.get_engine()
